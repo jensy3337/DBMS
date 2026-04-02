@@ -1,13 +1,12 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
-app.secret_key = "secret123"
 
 conn = sqlite3.connect('database.db', check_same_thread=False)
 cursor = conn.cursor()
 
-# CREATE TABLE
+# PRODUCTS TABLE
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +17,20 @@ CREATE TABLE IF NOT EXISTS Products (
 )
 """)
 
-# INSERT DATA IF EMPTY
+# ORDERS TABLE
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS Orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_name TEXT,
+    customer_name TEXT,
+    age INTEGER,
+    phone TEXT,
+    address TEXT,
+    quantity INTEGER
+)
+""")
+
+# INSERT SAMPLE PRODUCTS
 cursor.execute("SELECT COUNT(*) FROM Products")
 if cursor.fetchone()[0] == 0:
     cursor.executemany("""
@@ -36,64 +48,37 @@ if cursor.fetchone()[0] == 0:
 
 @app.route('/')
 def home():
-    search = request.args.get('search')
-    sort = request.args.get('sort')
-    category = request.args.get('category')
-    min_price = request.args.get('min_price')
-    max_price = request.args.get('max_price')
-
-    query = "SELECT name, price, stock_qty, category FROM Products WHERE 1=1"
-
-    if search:
-        query += f" AND name LIKE '%{search}%'"
-
-    if category:
-        query += f" AND category='{category}'"
-
-    if min_price and max_price:
-        query += f" AND price BETWEEN {min_price} AND {max_price}"
-
-    if sort == "low":
-        query += " ORDER BY price ASC"
-    elif sort == "high":
-        query += " ORDER BY price DESC"
-    elif sort == "name":
-        query += " ORDER BY name ASC"
-
-    cursor.execute(query)
+    cursor.execute("SELECT name, price, stock_qty, category FROM Products")
     products = cursor.fetchall()
-
     return render_template('index.html', products=products)
 
 
-# 🛒 ADD TO CART
-@app.route('/add/<name>')
-def add_to_cart(name):
-    if 'cart' not in session:
-        session['cart'] = []
-
-    session['cart'].append(name)
-    session.modified = True
-
-    return redirect(url_for('home'))
+# 🛒 BUY PAGE
+@app.route('/buy/<name>')
+def buy(name):
+    cursor.execute("SELECT name, price FROM Products WHERE name=?", (name,))
+    product = cursor.fetchone()
+    return render_template('buy.html', product=product)
 
 
-# 🧾 VIEW CART
-@app.route('/cart')
-def view_cart():
-    cart = session.get('cart', [])
+# 📥 PLACE ORDER
+@app.route('/place_order', methods=['POST'])
+def place_order():
+    product = request.form['product']
+    name = request.form['name']
+    age = request.form['age']
+    phone = request.form['phone']
+    address = request.form['address']
+    quantity = request.form['quantity']
 
-    items = []
-    total = 0
+    cursor.execute("""
+    INSERT INTO Orders (product_name, customer_name, age, phone, address, quantity)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (product, name, age, phone, address, quantity))
 
-    for item in cart:
-        cursor.execute("SELECT name, price FROM Products WHERE name=?", (item,))
-        result = cursor.fetchone()
-        if result:
-            items.append(result)
-            total += result[1]
+    conn.commit()
 
-    return render_template('cart.html', items=items, total=total)
+    return render_template('success.html', name=name)
 
 
 if __name__ == '__main__':
