@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request
-import mysql.connector
+import sqlite3
+
+conn = sqlite3.connect('database.db', check_same_thread=False)
+cursor = conn.cursor()
 
 app = Flask(__name__)
 
@@ -27,7 +29,7 @@ def home():
     elif sort == "high":
         query += " ORDER BY price DESC"
 
-    cursor.execute(query)
+    cursor.execute("SELECT name, price, stock_qty FROM Products")
     products = cursor.fetchall()
 
     return render_template('index.html', products=products)
