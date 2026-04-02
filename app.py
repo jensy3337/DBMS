@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS Products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     price REAL,
-    stock_qty INTEGER
+    stock_qty INTEGER,
+    category TEXT
 )
 """)
 
@@ -20,12 +21,14 @@ CREATE TABLE IF NOT EXISTS Products (
 cursor.execute("SELECT COUNT(*) FROM Products")
 if cursor.fetchone()[0] == 0:
     cursor.executemany("""
-    INSERT INTO Products (name, price, stock_qty)
-    VALUES (?, ?, ?)
+    INSERT INTO Products (name, price, stock_qty, category)
+    VALUES (?, ?, ?, ?)
     """, [
-        ("Laptop", 55000, 10),
-        ("Phone", 20000, 20),
-        ("Headphones", 1500, 50)
+        ("Laptop", 55000, 10, "Electronics"),
+        ("Phone", 20000, 20, "Electronics"),
+        ("Headphones", 1500, 50, "Accessories"),
+        ("Shoes", 3000, 25, "Fashion"),
+        ("Backpack", 1200, 40, "Accessories")
     ])
     conn.commit()
 
@@ -34,16 +37,27 @@ if cursor.fetchone()[0] == 0:
 def home():
     search = request.args.get('search')
     sort = request.args.get('sort')
+    category = request.args.get('category')
+    min_price = request.args.get('min_price')
+    max_price = request.args.get('max_price')
 
-    query = "SELECT name, price, stock_qty FROM Products"
+    query = "SELECT name, price, stock_qty, category FROM Products WHERE 1=1"
 
     if search:
-        query += f" WHERE name LIKE '%{search}%'"
+        query += f" AND name LIKE '%{search}%'"
+
+    if category:
+        query += f" AND category='{category}'"
+
+    if min_price and max_price:
+        query += f" AND price BETWEEN {min_price} AND {max_price}"
 
     if sort == "low":
         query += " ORDER BY price ASC"
     elif sort == "high":
         query += " ORDER BY price DESC"
+    elif sort == "name":
+        query += " ORDER BY name ASC"
 
     cursor.execute(query)
     products = cursor.fetchall()
