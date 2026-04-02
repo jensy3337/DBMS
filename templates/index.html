@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-Commerce Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>🛒 My Store</h1>
+
+<form method="GET">
+    <input type="text" name="search" placeholder="Search products">
+    
+    <select name="sort">
+        <option value="">Sort</option>
+        <option value="low">Price Low → High</option>
+        <option value="high">Price High → Low</option>
+    </select>
+
+    <button type="submit">Apply</button>
+</form>
+
+<div class="container">
+{% for p in products %}
+    <div class="card">
+        <h2>{{ p.name }}</h2>
+        <p>₹{{ p.price }}</p>
+        <p>Stock: {{ p.stock_qty }}</p>
+    </div>
+{% endfor %}
+</div>
+
+</body>
+</html>
