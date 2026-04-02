@@ -14,9 +14,7 @@ def home():
     search = request.args.get('search')
     sort = request.args.get('sort')
 
-    cursor = db.cursor(dictionary=True)
-
-    query = "SELECT * FROM Products"
+    query = "SELECT name, price, stock_qty FROM Products"
 
     if search:
         query += f" WHERE name LIKE '%{search}%'"
@@ -26,7 +24,7 @@ def home():
     elif sort == "high":
         query += " ORDER BY price DESC"
 
-    cursor.execute("SELECT name, price, stock_qty FROM Products")
+    cursor.execute(query)
     products = cursor.fetchall()
 
     return render_template('index.html', products=products)
