@@ -1,1 +1,44 @@
+body {
+    font-family: Arial;
+    background: #0f0f0f;
+    color: white;
+    text-align: center;
+}
 
+h1 {
+    margin-top: 20px;
+}
+
+input, select, button {
+    padding: 10px;
+    margin: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+button {
+    background: #ff4d6d;
+    color: white;
+    cursor: pointer;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 20px;
+    margin: 15px;
+    border-radius: 15px;
+    width: 200px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #ff4d6d;
+}
