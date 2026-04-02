@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = "secret123"
 
 conn = sqlite3.connect('database.db', check_same_thread=False)
 cursor = conn.cursor()
@@ -63,6 +64,36 @@ def home():
     products = cursor.fetchall()
 
     return render_template('index.html', products=products)
+
+
+# 🛒 ADD TO CART
+@app.route('/add/<name>')
+def add_to_cart(name):
+    if 'cart' not in session:
+        session['cart'] = []
+
+    session['cart'].append(name)
+    session.modified = True
+
+    return redirect(url_for('home'))
+
+
+# 🧾 VIEW CART
+@app.route('/cart')
+def view_cart():
+    cart = session.get('cart', [])
+
+    items = []
+    total = 0
+
+    for item in cart:
+        cursor.execute("SELECT name, price FROM Products WHERE name=?", (item,))
+        result = cursor.fetchone()
+        if result:
+            items.append(result)
+            total += result[1]
+
+    return render_template('cart.html', items=items, total=total)
 
 
 if __name__ == '__main__':
