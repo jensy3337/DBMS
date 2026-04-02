@@ -6,7 +6,28 @@ app = Flask(__name__)
 conn = sqlite3.connect('database.db', check_same_thread=False)
 cursor = conn.cursor()
 
+# CREATE TABLE
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS Products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    price REAL,
+    stock_qty INTEGER
+)
+""")
 
+# INSERT DATA IF EMPTY
+cursor.execute("SELECT COUNT(*) FROM Products")
+if cursor.fetchone()[0] == 0:
+    cursor.executemany("""
+    INSERT INTO Products (name, price, stock_qty)
+    VALUES (?, ?, ?)
+    """, [
+        ("Laptop", 55000, 10),
+        ("Phone", 20000, 20),
+        ("Headphones", 1500, 50)
+    ])
+    conn.commit()
 
 
 @app.route('/')
@@ -28,6 +49,7 @@ def home():
     products = cursor.fetchall()
 
     return render_template('index.html', products=products)
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=10000)
