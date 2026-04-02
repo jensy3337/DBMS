@@ -1,36 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>E-Commerce Store</title>
+    <title>My Store</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
 <h1>🛒 My Store</h1>
-
-<form method="GET">
-
-    <input type="text" name="search" placeholder="Search products" onkeyup="this.form.submit()">
-
-    <select name="category">
-        <option value="">All Categories</option>
-        <option value="Electronics">Electronics</option>
-        <option value="Accessories">Accessories</option>
-        <option value="Fashion">Fashion</option>
-    </select>
-
-    <input type="number" name="min_price" placeholder="Min Price">
-    <input type="number" name="max_price" placeholder="Max Price">
-
-    <select name="sort">
-        <option value="">Sort</option>
-        <option value="low">Price Low → High</option>
-        <option value="high">Price High → Low</option>
-        <option value="name">Name A → Z</option>
-    </select>
-
-    <button type="submit">Apply</button>
-</form>
 
 <div class="container">
 {% for p in products %}
@@ -39,7 +15,10 @@
         <p>₹{{ p[1] }}</p>
         <p>Stock: {{ p[2] }}</p>
         <p>Category: {{ p[3] }}</p>
-        <button>Add to Cart</button>
+
+        <a href="/buy/{{ p[0] }}">
+            <button>Buy Now</button>
+        </a>
     </div>
 {% endfor %}
 </div>
