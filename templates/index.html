@@ -23,9 +23,9 @@
 <div class="container">
 {% for p in products %}
     <div class="card">
-        <h2>{{ p.name }}</h2>
-        <p>₹{{ p.price }}</p>
-        <p>Stock: {{ p.stock_qty }}</p>
+        <h2>{{ p[0] }}</h2>
+        <p>₹{{ p[1] }}</p>
+        <p>Stock: {{ p[2] }}</p>
     </div>
 {% endfor %}
 </div>
